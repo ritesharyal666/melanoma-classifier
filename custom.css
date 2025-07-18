@@ -1,0 +1,40 @@
+body {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+.title {
+  font-size: 2.8rem;
+  font-weight: bold;
+  background: linear-gradient(90deg, #6c63ff, #ff6584);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: #a0a0a0;
+  margin-bottom: 2rem;
+}
+
+.stButton>button {
+  background-color: #6c63ff;
+  color: white;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 10px 24px;
+  transition: 0.3s ease;
+}
+
+.stButton>button:hover {
+  background-color: #564fd1;
+  transform: scale(1.02);
+}
+
+h2 {
+  color: #6c63ff;
+}
+
+a {
+  color: #ff6584 !important;
+}
