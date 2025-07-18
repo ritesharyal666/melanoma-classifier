@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Melanoma Classifier</title>
+    <style>
+      :root {
+        --primary: #6c63ff;
+        --primary-dark: #564fd1;
+        --secondary: #ff6584;
+        --dark-bg: #121212;
+        --dark-surface: #1e1e1e;
+        --dark-surface-hover: #2a2a2a;
+        --dark-text: #e0e0e0;
+        --dark-text-secondary: #a0a0a0;
+        --success: #4caf50;
+        --success-bg: #2d3a2d;
+        --danger: #f44336;
+        --danger-bg: #3a2d2d;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        background-color: var(--dark-bg);
+        color: var(--dark-text);
+        line-height: 1.6;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        color: white;
+        font-weight: 700;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      p {
+        margin-bottom: 25px;
+        font-size: 1.1rem;
+        color: var(--dark-text-secondary);
+      }
+
+      .main-container {
+        display: flex;
+        gap: 30px;
+        flex-wrap: wrap;
+      }
+
+      .content-section {
+        flex: 1;
+        min-width: 300px;
+      }
+
+      .upload-section {
+        flex: 1;
+        min-width: 300px;
+      }
+
+      .upload-container {
+        border: 2px dashed var(--dark-text-secondary);
+        padding: 30px;
+        text-align: center;
+        background-color: var(--dark-surface);
+        border-radius: 12px;
+        margin-bottom: 30px;
+        transition: all 0.3s ease;
+      }
+
+      .upload-container:hover {
+        border-color: var(--primary);
+        background-color: var(--dark-surface-hover);
+      }
+
+      input[type="file"] {
+        display: none;
+      }
+
+      .file-label {
+        display: block;
+        background-color: var(--primary);
+        color: white;
+        padding: 12px 24px;
+        font-size: 1rem;
+        font-weight: 500;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin: 0 auto 15px;
+        width: fit-content;
+      }
+
+      .file-label:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
+      button {
+        background-color: var(--primary);
+        color: white;
+        padding: 12px 24px;
+        font-size: 1rem;
+        font-weight: 500;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        max-width: 250px;
+        margin: 0 auto;
+      }
+
+      button:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 99, 255, 0.3);
+      }
+
+      #preview {
+        display: none;
+        max-width: 100%;
+        height: auto;
+        max-height: 400px;
+        margin: 20px auto;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        object-fit: contain;
+      }
+
+      #result {
+        display: none;
+        margin-top: 25px;
+        padding: 20px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .benign {
+        background-color: var(--success-bg);
+        color: #c8e6c9;
+        border-left: 5px solid var(--success);
+      }
+
+      .malignant {
+        background-color: var(--danger-bg);
+        color: #ffcdd2;
+        border-left: 5px solid var(--danger);
+      }
+
+      /* Instructions Section */
+      .instructions {
+        background-color: var(--dark-surface);
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .instructions h2 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        color: var(--primary);
+        font-size: 1.5rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .instructions h2::before {
+        content: "📌";
+      }
+
+      .instructions ul {
+        padding-left: 20px;
+        margin-bottom: 20px;
+      }
+
+      .instructions li {
+        margin-bottom: 10px;
+        position: relative;
+      }
+
+      .instructions li::before {
+        content: "•";
+        color: var(--primary);
+        font-weight: bold;
+        display: inline-block;
+        width: 1em;
+        margin-left: -1em;
+      }
+
+      .instructions strong {
+        color: white;
+      }
+
+      /* Examples Section */
+      .examples {
+        background-color: var(--dark-surface);
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .examples h2 {
+        color: var(--primary);
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-weight: 600;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .examples h2::before {
+        content: "🖼️";
+      }
+
+      .example-images {
+        display: grid;
+        grid-template-columns: repeat(
+          auto-fill,
+          minmax(300px, 1fr)
+        ); /* Increased from 250px */
+        gap: 20px;
+      }
+      .example-item {
+        background-color: var(--dark-surface-hover);
+        border-radius: 12px;
+        padding: 20px; /* Slightly increased from 15px */
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 1px solid #333;
+      }
+      .example-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        border-color: var(--primary);
+      }
+
+      .example-item img {
+        width: 100%;
+        height: 300px; /* Increased from 200px and matches width */
+        object-fit: cover;
+        aspect-ratio: 1/1; /* Ensures perfect square */
+        border-radius: 8px;
+        margin-bottom: 12px;
+        transition: transform 0.3s ease;
+      }
+
+      .example-item:hover img {
+        transform: scale(1.03);
+      }
+
+      .example-caption {
+        font-weight: 500;
+        color: var(--dark-text);
+        font-size: 0.95rem;
+        text-align: center;
+      }
+
+      .example-caption strong {
+        color: white;
+        font-weight: 600;
+      }
+
+      /* Result icons */
+      .result-icon {
+        font-size: 1.5rem;
+        margin-right: 10px;
+        vertical-align: middle;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .main-container {
+          flex-direction: column;
+        }
+
+        .content-section,
+        .upload-section {
+          width: 100%;
+        }
+
+        .example-images {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Loading spinner */
+      .spinner {
+        display: none;
+        width: 40px;
+        height: 40px;
+        margin: 20px auto;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--primary);
+        animation: spin 1s ease-in-out infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Melanoma Skin Lesion Classifier</h1>
+    <p>
+      Upload an image of a skin lesion to classify it as benign or malignant
+      with our AI-powered diagnostic tool.
+    </p>
+
+    <div class="main-container">
+      <div class="content-section">
+        <!-- Instructions Section -->
+        <div class="instructions">
+          <h2>Image Upload Guidelines</h2>
+          <p><strong>For best results, use images that:</strong></p>
+          <ul>
+            <li>Are clear, focused close-ups of the skin lesion</li>
+            <li>Have good lighting without heavy shadows or reflections</li>
+            <li>Show the lesion centered, filling most of the frame</li>
+            <li>Are taken with a neutral background (skin only)</li>
+          </ul>
+          <p><strong>Please avoid images that:</strong></p>
+          <ul>
+            <li>Are blurry, out of focus, or low resolution</li>
+            <li>Contain multiple lesions or unrelated objects</li>
+            <li>Have heavy shadows, reflections, or uneven lighting</li>
+            <li>Are taken with filters or color distortions</li>
+          </ul>
+        </div>
+
+        <!-- Examples Section -->
+        <div class="examples">
+          <h2>Example Images</h2>
+          <div class="example-images">
+            <div class="example-item" onclick="useExample('goodexample.jpeg')">
+              <img
+                src="static/images/goodexample.jpeg"
+                alt="Good Example Image"
+              />
+              <div class="example-caption">
+                <strong>Good example:</strong> Clear close-up with proper
+                lighting
+              </div>
+            </div>
+            <div class="example-item" onclick="useExample('badexample.jpg')">
+              <img src="static/images/badexample.jpg" alt="Bad Example Image" />
+              <div class="example-caption">
+                <strong>Bad example:</strong> Zoomed out and unfocused
+              </div>
+            </div>
+            <div class="example-item" onclick="useExample('benign.jpg')">
+              <img src="static/images/benign.jpg" alt="Benign Skin Lesion" />
+              <div class="example-caption">
+                <strong>Benign lesion</strong> - Try this sample
+              </div>
+            </div>
+            <div class="example-item" onclick="useExample('melanoma.jpg')">
+              <img
+                src="static/images/melanoma.jpg"
+                alt="Malignant Melanoma Lesion"
+              />
+              <div class="example-caption">
+                <strong>Malignant lesion</strong> - Try this sample
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="upload-section">
+        <div class="upload-container">
+          <label for="imageUpload" class="file-label">Choose an Image</label>
+          <input type="file" id="imageUpload" accept="image/*" />
+          <p style="color: var(--dark-text-secondary); margin-bottom: 20px">
+            or drag and drop file here
+          </p>
+          <button onclick="predict()">Analyze Image</button>
+        </div>
+
+        <div id="imageContainer">
+          <img id="preview" />
+          <div class="spinner" id="spinner"></div>
+        </div>
+
+        <div id="result"></div>
+      </div>
+    </div>
+
+    <script>
+      // Handle drag and drop
+      const uploadContainer = document.querySelector(".upload-container");
+      const fileInput = document.getElementById("imageUpload");
+
+      uploadContainer.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        uploadContainer.style.borderColor = "var(--primary)";
+        uploadContainer.style.backgroundColor = "var(--dark-surface-hover)";
+      });
+
+      uploadContainer.addEventListener("dragleave", () => {
+        uploadContainer.style.borderColor = "var(--dark-text-secondary)";
+        uploadContainer.style.backgroundColor = "var(--dark-surface)";
+      });
+
+      uploadContainer.addEventListener("drop", (e) => {
+        e.preventDefault();
+        uploadContainer.style.borderColor = "var(--dark-text-secondary)";
+        uploadContainer.style.backgroundColor = "var(--dark-surface)";
+
+        if (e.dataTransfer.files.length) {
+          fileInput.files = e.dataTransfer.files;
+          previewImage(e.dataTransfer.files[0]);
+        }
+      });
+
+      // Preview image when selected
+      fileInput.addEventListener("change", function (e) {
+        if (e.target.files.length) {
+          previewImage(e.target.files[0]);
+        }
+      });
+
+      function previewImage(file) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          const preview = document.getElementById("preview");
+          preview.src = event.target.result;
+          preview.style.display = "block";
+          document.getElementById("result").style.display = "none";
+        };
+        reader.readAsDataURL(file);
+      }
+
+      // Example image click handler
+      function useExample(filename) {
+        // In a real implementation, you would fetch the example image
+        // For this demo, we'll just show a message
+        alert(
+          `Loading example image: ${filename}\nIn a real implementation, this would load the sample image for analysis.`
+        );
+      }
+
+      async function predict() {
+        const fileInput = document.getElementById("imageUpload");
+        const file = fileInput.files[0];
+
+        if (!file) {
+          alert("Please select an image first.");
+          return;
+        }
+
+        const preview = document.getElementById("preview");
+        const resultDiv = document.getElementById("result");
+        const spinner = document.getElementById("spinner");
+
+        // Show loading spinner
+        spinner.style.display = "block";
+        resultDiv.style.display = "none";
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        try {
+          // Simulate API call delay
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
+          // In a real implementation, you would use this:
+          /*
+          const response = await fetch("/predict", {
+            method: "POST",
+            body: formData,
+          });
+          const data = await response.json();
+          */
+
+          // For demo purposes, we'll simulate a response
+          const simulatedResponse = {
+            ok: true,
+            result: Math.random() > 0.5 ? "malignant" : "benign",
+            confidence: Math.random() * 0.5 + 0.5, // Random confidence between 0.5 and 1.0
+          };
+
+          spinner.style.display = "none";
+          resultDiv.style.display = "block";
+
+          if (simulatedResponse.ok) {
+            if (simulatedResponse.result === "malignant") {
+              resultDiv.className = "malignant";
+              resultDiv.innerHTML = `
+                <h2><span class="result-icon">🔴</span> Result: Malignant (Possible Melanoma)</h2>
+                <p><strong>Confidence:</strong> ${(
+                  simulatedResponse.confidence * 100
+                ).toFixed(2)}%</p>
+                <p><strong>Recommendation:</strong> Please consult a dermatologist immediately for further evaluation. This result suggests characteristics that may indicate melanoma, a serious form of skin cancer.</p>
+                <p>Early detection is crucial for successful treatment.</p>
+              `;
+            } else {
+              resultDiv.className = "benign";
+              resultDiv.innerHTML = `
+                <h2><span class="result-icon">🟢</span> Result: Benign</h2>
+                <p><strong>Confidence:</strong> ${(
+                  100 -
+                  simulatedResponse.confidence * 100
+                ).toFixed(2)}%</p>
+                <p><strong>Recommendation:</strong> No signs of malignancy detected. However, regular skin checkups are recommended, especially if you notice any changes in size, shape, or color of this lesion.</p>
+                <p>Continue to monitor and consult a dermatologist with any concerns.</p>
+              `;
+            }
+          } else {
+            alert(`Server Error: ${simulatedResponse.error}`);
+          }
+        } catch (error) {
+          spinner.style.display = "none";
+          alert(`Error: ${error.message}`);
+        }
+      }
+    </script>
+  </body>
+</html>
